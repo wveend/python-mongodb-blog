@@ -40,16 +40,25 @@ def post():
     else:
         return render_template('post.html')
 
+
 def connect_db():
-    hosts = json.loads(os.environ.get('MONGODB_HOSTS', '["localhost"]'))
-    db_port = json.loads(os.environ.get('MONGODB_PORT', 27017))
-    replicaset = os.environ.get('MONGODB_REPLSET', None)
-    if replicaset and replicaset != "null":
-        conn_str = ",".join([ h+':'+str(db_port) for h in hosts])
-        conn = pymongo.MongoReplicaSetClient(conn_str, replicaSet=replicaset, 
-                    read_preference=pymongo.ReadPreference.PRIMARY_PREFERRED)
+    if 'VCAP_SERVICES' in os.environ:
+        vcap_json = json.loads(os.getenv('VCAP_SERVICES'))
+        mongo_host = vcap_json['mongodb'][0]['credentials']['host']
+        mongo_username = vcap_json['mongodb'][0]['credentials']['username']
+        mongo_password = vcap_json['mongodb'][0]['credentials']['password']
+        mongo_port = vcap_json['mongodb'][0]['credentials']['port']
+        mongo_uri = vcap_json['mongodb'][0]['credentials']['uri']
+        print("================================================")
+        print(mongo_host, mongo_username, mongo_password, mongo_port, mongo_uri)
+        print("================================================")
     else:
-        conn = pymongo.MongoClient(hosts[0]+":"+str(db_port))
+        mongo_uri = 'mongodb://localhost:27017'
+    conn = pymongo.MongoClient(mongo_host, 
+                                username=mongo_username, 
+                                password=mongo_password,
+                                authSource='admin',
+                                authMechanism='SCRAM-SHA-1')
     return conn['blog']
 
 if __name__ == "__main__":
