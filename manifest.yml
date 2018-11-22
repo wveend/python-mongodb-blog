@@ -1,0 +1,6 @@
+applications:
+- name: mongoblog 
+  memory: 128M
+  disk_quota: 256M
+  buildpacks: 
+  - python_buildpack
