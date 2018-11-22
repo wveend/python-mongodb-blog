@@ -4,3 +4,5 @@ applications:
   disk_quota: 192M
   buildpacks: 
   - python_buildpack
+  # services:
+  # - mongoblog-db
