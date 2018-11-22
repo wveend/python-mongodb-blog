@@ -49,16 +49,14 @@ def connect_db():
         mongo_password = vcap_json['mongodb'][0]['credentials']['password']
         mongo_port = vcap_json['mongodb'][0]['credentials']['port']
         mongo_uri = vcap_json['mongodb'][0]['credentials']['uri']
-        print("================================================")
-        print(mongo_host, mongo_username, mongo_password, mongo_port, mongo_uri)
-        print("================================================")
+        conn = pymongo.MongoClient(mongo_host,
+                                  username=mongo_username,
+                                  password=mongo_password,
+                                  authSource='admin',
+                                  authMechanism='SCRAM-SHA-1')
     else:
         mongo_uri = 'mongodb://localhost:27017'
-    conn = pymongo.MongoClient(mongo_host, 
-                                username=mongo_username, 
-                                password=mongo_password,
-                                authSource='admin',
-                                authMechanism='SCRAM-SHA-1')
+        conn = pymongo.MongoClient(mongo_uri)
     return conn['blog']
 
 if __name__ == "__main__":
