@@ -9,6 +9,13 @@ import os
 import pymongo
 import time
 
+try:
+    # Python 3.x
+    from urllib.parse import quote_plus
+except ImportError:
+    # Python 2.x
+    from urllib import quote_plus
+
 static_path = os.path.abspath(os.path.join(__file__, '..', '..', 'public', 'static'))
 app = Flask(__name__, static_folder=static_path)
 
@@ -42,14 +49,23 @@ def post():
 
 
 def connect_db():
+    default_database = 'blog'
+
     if 'VCAP_SERVICES' in os.environ:
         vcap_json = json.loads(os.getenv('VCAP_SERVICES'))
         credentials = vcap_json['mongodb'][0]['credentials']
-        mongo_uri = credentials['uri']
-        mongo_database = credentials['database']
+        mongo_database = credentials.get('database', default_database)
+        mongo_uri = credentials.get('uri', '{protocol}://{username}:{password}@{host}:{port}/{database}'.format(
+            protocol = credentials.get('Protocol', 'mongodb'),
+            username = quote_plus(credentials['username']),
+            password = quote_plus(credentials['password']),
+            host = credentials['host'],
+            port = credentials['port'],
+            database = mongo_database,
+        ))
     else:
+        mongo_database = default_database
         mongo_uri = 'mongodb://localhost:27017'
-        mongo_database = 'blog'
 
     conn = pymongo.MongoClient(mongo_uri)
     return conn[mongo_database]
