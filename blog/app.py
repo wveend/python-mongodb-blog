@@ -44,20 +44,15 @@ def post():
 def connect_db():
     if 'VCAP_SERVICES' in os.environ:
         vcap_json = json.loads(os.getenv('VCAP_SERVICES'))
-        mongo_host = vcap_json['mongodb'][0]['credentials']['host']
-        mongo_username = vcap_json['mongodb'][0]['credentials']['username']
-        mongo_password = vcap_json['mongodb'][0]['credentials']['password']
-        mongo_port = vcap_json['mongodb'][0]['credentials']['port']
-        mongo_uri = vcap_json['mongodb'][0]['credentials']['uri']
-        conn = pymongo.MongoClient(mongo_host,
-                                  username=mongo_username,
-                                  password=mongo_password,
-                                  authSource='admin',
-                                  authMechanism='SCRAM-SHA-1')
+        credentials = vcap_json['mongodb'][0]['credentials']
+        mongo_uri = credentials['uri']
+        mongo_database = credentials['database']
     else:
         mongo_uri = 'mongodb://localhost:27017'
-        conn = pymongo.MongoClient(mongo_uri)
-    return conn['blog']
+        mongo_database = 'blog'
+
+    conn = pymongo.MongoClient(mongo_uri)
+    return conn[mongo_database]
 
 if __name__ == "__main__":
     # NOTE: debug True breaks PyDev debugger
