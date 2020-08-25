@@ -1,9 +1,13 @@
 {% extends "base.html" %}
 {% block content %}
+{% if posts is defined and post|length > 0 %}
 {% for post in posts %}
   <div class="page-header">
 	  <h1>{{ post['title'] }}</h1>
 	  <p>{{ post['body'] }}</p>
   </div>
 {% endfor %}
+{% else %}
+<h2>It looks like there are no posts yet. Add one by clicking above!</h2>
+{% endif %}
 {% endblock %}
